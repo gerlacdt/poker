@@ -18,3 +18,25 @@
   (sort > (vec (for [x (string/split hand #"\s+")
                    :let [y (subs x 0 1)]]
                (.indexOf rank-values y)))))
+
+
+(defn straight
+  "Return true if the ordered ranks form a 5-card straight"
+  [ranks]
+  (and (= 5 (count (set ranks))) 
+       (= 4 (- (apply max ranks) (apply min ranks)))))
+
+
+(defn flush
+  "Return true if all the cards have the same suit."
+  [hand]
+  (let [hand-list (string/split hand #"\s+")]
+    (if (= 1 (count (reduce #(conj % (second %2)) #{} hand-list)))
+      true
+      false)))
+
+(defn kind
+  "Return the first rank that this hand has exactly n of. Return
+   None if there is no n-of-a-kind in the hand."
+  [n ranks]
+  '9)
