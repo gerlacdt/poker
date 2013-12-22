@@ -39,4 +39,11 @@
   "Return the first rank that this hand has exactly n of. Return
    None if there is no n-of-a-kind in the hand."
   [n ranks]
-  '9)
+  (first (filter (fn [x] (= n (count-freq ranks x))) ranks)))
+
+(defn count-freq
+  "Count the frequency of a given element in a sequence"
+  [coll elem]
+  (reduce #(if (= %2 elem)
+             (inc %)
+             %) 0 coll))

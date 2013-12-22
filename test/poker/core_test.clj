@@ -24,3 +24,6 @@
       (is (false? (p/straight [9, 8, 8, 6, 5])))
       (is (= 9 (p/kind p/card-ranks fk))))))
 
+(deftest count-test
+  (testing "count the frequency of a given element in a sequence"
+    (is (= 4 (count-freq 9 [9 9 9 9 4])))))
