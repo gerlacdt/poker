@@ -3,26 +3,27 @@
             [poker.core :as p]
             [clojure.string :as string]))
 
-(deftest a-test
-  (testing "FIXED."
-    (is (= 0 0))))
-
+(defn poker-string->vec
+  "creates a vector from given string"
+  [s]
+  (string/split s #"\s+"))
 
 (deftest card-ranks-test
   (testing "testing poker functions....."
-    (let [sf "6C 7C 8C 9C TC"
-          fk "9D 9H 9S 9C 7D"
-          fh "TD TC TH 7C 7D"
-          tp "5S 5D 9H 9C 6S"
-          s1 "AS 2S 3S 4S 5S"
-          tk "9D 9H 9C 7D 8D"
-          flush "2S 4S 6S 8S QS"
-          straight "2S 3S 4S 5S 6D"
-          op "2S 2D AS 4D 5S"
-          hk "2S 7D AS 4D 5S"]
+    (let [sf (poker-string->vec "6C 7C 8C 9C TC")
+          sf-best (poker-string->vec "TC JC QC KC AC")
+          fk (poker-string->vec "9D 9H 9S 9C 7D")
+          fh (poker-string->vec "TD TC TH 7C 7D")
+          tp (poker-string->vec "5S 5D 9H 9C 6S")
+          s1 (poker-string->vec "AS 2S 3S 4S 5S")
+          tk (poker-string->vec "9D 9H 9C 7D 8D")
+          flush (poker-string->vec "2S 4S 6S 8S QS")
+          straight (poker-string->vec "2S 3S 4S 5S 6D")
+          op (poker-string->vec "2S 2D AS 4D 5S")
+          hk (poker-string->vec "2S 7D AS 4D 5S")]
       (testing "card-rank function"
-        (is (= [9, 8, 7, 6, 5] (p/card-ranks "6C 7C 9C 8C 5C")))
-        (is (= [14, 13, 12, 11 , 10] (p/card-ranks "TC JC QC KC AC")))
+        (is (= [10, 9, 8, 7, 6] (p/card-ranks sf)))
+        (is (= [14, 13, 12, 11 , 10] (p/card-ranks sf-best)))
         (is (= [10, 9, 8, 7, 6] (p/card-ranks sf)))
         (is (= [9, 9, 9, 9, 7] (p/card-ranks fk)))
         (is (= [10, 10, 10, 7 , 7] (p/card-ranks fh))))

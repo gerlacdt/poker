@@ -15,10 +15,10 @@
    e.g.:
    '6C 7C 8C 9C TC' is a straight flush, so the corresponding tuple is:
     (10, 9, 8, 7, 6)"
-  [^String hand]
-  (let [ranks (sort > (vec (for [x (string/split hand #"\s+")
-                                 :let [y (subs x 0 1)]]
-                             (.indexOf rank-values y))))]
+  [hand]
+  (let [ranks (sort > (for [x hand
+                                :let [y (subs x 0 1)]]
+                            (.indexOf rank-values y)))]
     (if (= ranks '(14 5 4 3 2))
       '(5 4 3 2 1)
       ranks)))
@@ -34,10 +34,9 @@
 (defn flush
   "Return true if all the cards have the same suit."
   [hand]
-  (let [hand-list (string/split hand #"\s+")]
-    (if (= 1 (count (reduce #(conj % (second %2)) #{} hand-list)))
-      true
-      false)))
+  (if (= 1 (count (reduce #(conj % (second %2)) #{} hand)))
+    true
+    false))
 
 (defn count-freq
   "Count the frequency of a given element in a sequence"
@@ -68,7 +67,7 @@
 
 (defn hand-rank
   "Return a value indicating how high the hand ranks."
-  [^String hand]
+  [hand]
   (let [ranks (card-ranks hand)]
     (cond 
      (and (straight ranks) (flush hand)) (-> [] (conj 8) (conj (apply max ranks)))
@@ -103,25 +102,19 @@
   [numhands n]
   (let [shuffled-deck (shuffle deck)]
     (for [i (range numhands)]
-      (string/join " " (subvec shuffled-deck (* n i) (* n (+ i 1)))))))
+      (subvec shuffled-deck (* n i) (* n (+ i 1))))))
 
 (def hand-names ["high card" "one pair" "two pair" "three-kind" "straight" "flush" "full house" "four kind" "straight flush"])
-
-(def counts (atom (vec (repeat 9 0))))
-
-(defn reset-counts
-  "Resets global counts var to to zeros"
-  []
-  (reset! counts (vec (repeat 9 0))))
 
 (defn hand-percentages
   "Sample n random hands and print a table of percentages for each
   type of hand. n should be 700,000"  
   [n]
-  (reset-counts)
-  (dotimes [_ (/ n 10)]
-    (doseq [hand (deal 10 5)]
-      (let [rank (first (hand-rank hand))]
-        (swap! counts assoc rank (+ 1 (nth @counts rank))))))
-  (dotimes [i 9]
-    (println (format "%14s: %6.3f %%" (nth hand-names i) (float (* 100 (/ (nth @counts i) n)))))))
+  (let [counts (atom (vec (repeat 9 0)))]
+    (dotimes [_ (/ n 10)]
+      (doseq [hand (deal 10 5)]
+        (let [rank (first (hand-rank hand))]
+          (swap! counts assoc rank (+ 1 (nth @counts rank))))))
+    (dotimes [i 9]
+      (println (format "%14s: %6.3f %%" (nth hand-names i) (float (* 100 (/ (nth @counts i) n))))))
+    (println @counts)))
