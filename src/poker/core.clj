@@ -53,7 +53,7 @@
   (first (filter (fn [x] (= n (count-freq ranks x))) ranks)))
 
 (defn two-pair
-  "If there are two pair, return thw two ranks as a tuple: 
+  "If there are two pair, return the two ranks as a tuple: 
    (highest, lowest); otherwise return Nil."
   [ranks]
   (let [pairs (reduce (fn [x y]
@@ -67,14 +67,61 @@
       nil)))
 
 (defn hand-rank
-  "Return a value indicating hhow high the hand ranks."
+  "Return a value indicating how high the hand ranks."
   [^String hand]
   (let [ranks (card-ranks hand)]
     (cond 
      (and (straight ranks) (flush hand)) (-> [] (conj 8) (conj (apply max ranks)))
-     (kind 4 ranks) (-> [] (conj 7) (conj (kind 4 ranks)) (conj (kind 1 ranks))))))
+     (kind 4 ranks) (-> [] (conj 7) (conj (kind 4 ranks)) (conj (kind 1 ranks)))
+     (and (kind 3 ranks) (kind 2 ranks)) (-> [] (conj 6) (conj (kind 3 ranks)) (conj (kind 2 ranks)))
+     (flush hand) (-> [] (conj 5) (conj ranks))
+     (straight ranks) (conj [4] (apply max ranks))
+     (kind 3 ranks) (-> [3] (conj (kind 3 ranks)) (conj ranks))
+     (two-pair ranks) (-> [2] (conj (two-pair ranks)) (conj ranks))
+     (kind 2 ranks) (-> [1] (conj (kind 2 ranks)) (conj ranks))
+     :else (-> [0] (conj ranks))
+)))
 
 (defn allmax
   "Return a list of all items equals to the max of the sequence."
-  [coll key]
-  (apply max-key key coll))
+  [coll]
+  (let [maximum (apply max-key #(first (hand-rank %)) coll)]  
+    (for [x coll :when (= maximum x)]
+      x)))
+
+(defn poker
+  "Return a list of winning hands. poker([hand1, hand2, ...] => [hand, ..."
+  [hands]
+  (allmax hands))
+
+(def deck (for [r "23456789TJQKA" s "SHDC"]
+            (str r s)))
+
+(defn deal
+  "Shuffle the deck and deal out numhands n-card hands.
+   e.g. deal 4 5 => 4 players with 5 cards"
+  [numhands n]
+  (let [shuffled-deck (shuffle deck)]
+    (for [i (range numhands)]
+      (string/join " " (subvec shuffled-deck (* n i) (* n (+ i 1)))))))
+
+(def hand-names ["high card" "one pair" "two pair" "three-kind" "straight" "flush" "full house" "four kind" "straight flush"])
+
+(def counts (atom (vec (repeat 9 0))))
+
+(defn reset-counts
+  "Resets global counts var to to zeros"
+  []
+  (reset! counts (vec (repeat 9 0))))
+
+(defn hand-percentages
+  "Sample n random hands and print a table of percentages for each
+  type of hand. n should be 700,000"  
+  [n]
+  (reset-counts)
+  (dotimes [_ (/ n 10)]
+    (doseq [hand (deal 10 5)]
+      (let [rank (first (hand-rank hand))]
+        (swap! counts assoc rank (+ 1 (nth @counts rank))))))
+  (dotimes [i 9]
+    (println (format "%14s: %6.3f %%" (nth hand-names i) (float (* 100 (/ (nth @counts i) n)))))))
