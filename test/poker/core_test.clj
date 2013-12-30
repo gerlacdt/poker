@@ -17,10 +17,14 @@
           tp (poker-string->vec "5S 5D 9H 9C 6S")
           s1 (poker-string->vec "AS 2S 3S 4S 5S")
           tk (poker-string->vec "9D 9H 9C 7D 8D")
+          tk-10s (poker-string->vec "TD TH TC 3D 2S")
           flush (poker-string->vec "2S 4S 6S 8S QS")
           straight (poker-string->vec "2S 3S 4S 5S 6D")
           op (poker-string->vec "2S 2D AS 4D 5S")
           hk (poker-string->vec "2S 7D AS 4D 5S")]
+      (testing "find-max-poker"
+        (is (= sf (p/find-max-poker [sf sf])))
+        (is (= sf (p/find-max-poker [tk s1 sf fh]))))
       (testing "card-rank function"
         (is (= [10, 9, 8, 7, 6] (p/card-ranks sf)))
         (is (= [14, 13, 12, 11 , 10] (p/card-ranks sf-best)))
@@ -54,7 +58,9 @@
         (is (= [tp tp] (p/allmax [hk hk tp tp]))))
       (testing "poker"
         (is (= [sf] (p/poker [sf fk op hk])))
-        (is (= [fk fk] (p/poker [fk fk tp fh])))))))
+        (is (= [fk fk] (p/poker [fk fk tp fh])))
+        (is (= [tk] (p/poker [tk tp op hk])))
+        (is (= [tk-10s] (p/poker [tk-10s tk])))))))
 
 
 (deftest count-test

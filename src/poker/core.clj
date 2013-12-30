@@ -81,10 +81,21 @@
      :else (-> [0] (conj ranks))
 )))
 
+(defn find-max-poker
+  "Return the max hand of the given poker hands."
+  [hands]
+  (let [min-count (count (apply min-key count (for [hand hands]
+                                                (hand-rank hand))))]
+    (reduce (fn [x y] 
+              (if (<= 0 (compare (subvec (vec (flatten (hand-rank x))) 0 min-count) 
+                                 (subvec (vec (flatten (hand-rank y))) 0 min-count)))
+                x
+                y)) hands)))
+
 (defn allmax
   "Return a list of all items equals to the max of the sequence."
   [coll]
-  (let [maximum (apply max-key #(first (hand-rank %)) coll)]  
+  (let [maximum (find-max-poker coll)]
     (for [x coll :when (= maximum x)]
       x)))
 
